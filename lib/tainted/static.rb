@@ -1,5 +1,3 @@
-require "syntax_tree"
-
 module Tainted
   class Static < SyntaxTree::Visitor
     def initialize(var_dependencies, sources, sinks)
