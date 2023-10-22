@@ -42,7 +42,7 @@ module Tainted
       method_name = node.message.value
       taint_statuses.each do |status|
         if status[1]
-          puts "Method #{method_name}() consuming tainted variable #{status[0].value.value}"
+          puts "Method `#{method_name}()` consuming tainted variable `#{status[0].value.value}`"
         end
       end
     end

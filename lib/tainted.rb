@@ -1,5 +1,9 @@
 require "syntax_tree"
 
+require_relative "state"
+require_relative "static"
+require_relative "lint"
+
 module Tainted
   class DataFlow
     def initialize(file_path)
@@ -21,28 +25,6 @@ module Tainted
       @dfg.insn_flows.keys.each do |key|
         flow = @dfg.insn_flows[key]
         next if flow.in.empty? && flow.out.empty?
-
-        # Check in
-        # next if flow.in.empty?
-        # unless flow.in.empty?
-        #   # in_flow = flow.in[0]
-        #   flow.in.each do |in_flow|
-        #     insn = @cfg.insns[in_flow.length]
-
-        #     variable = nil
-        #     if insn.is_a?(SyntaxTree::YARV::GetLocalWC0)
-        #       variable = @iseq.local_table.locals[insn.index]
-        #     end
-        #     next if variable.nil?
-
-        #     # pp [flow, variable]
-        #     if @var_flows.key? variable.name
-        #       @var_flows[variable.name][:to] << flow
-        #     else
-        #       @var_flows[variable.name] = { to: [flow], from: [] }
-        #     end
-        #   end
-        # end
 
         # Check out
         unless flow.out.empty?
@@ -99,16 +81,14 @@ module Tainted
     end
 
     def is_local?(insn)
-      classes = [
+      [
         SyntaxTree::YARV::GetLocalWC0,
         SyntaxTree::YARV::GetLocalWC1,
         SyntaxTree::YARV::GetLocal,
         SyntaxTree::YARV::SetLocalWC0,
         SyntaxTree::YARV::SetLocalWC1,
         SyntaxTree::YARV::SetLocal
-      ]
-
-      return classes.include?(insn.class)
+      ].include?(insn.class)
     end
   end
 end
