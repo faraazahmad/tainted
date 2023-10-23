@@ -7,3 +7,5 @@ source "https://rubygems.org"
 gem "syntax_tree", "~> 6.2"
 
 gem "rubocop", "~> 1.57", groups: %i[development test]
+
+gem "rake", "~> 13.0", :groups => [:development, :test]
