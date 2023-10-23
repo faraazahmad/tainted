@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Tainted
   class DataFlow
     def initialize(file_path)
@@ -16,29 +18,29 @@ module Tainted
     end
 
     def tainted
-      @dfg.insn_flows.keys.each do |key|
+      @dfg.insn_flows.each_key do |key|
         flow = @dfg.insn_flows[key]
         next if flow.in.empty? && flow.out.empty?
 
         # Check out
-        unless flow.out.empty?
-          flow.out.each do |out_flow|
-            insn = @cfg.insns[out_flow.length]
+        next if flow.out.empty?
 
-            variable = nil
-            if insn.is_a?(SyntaxTree::YARV::SetLocalWC0)
-              variable = @iseq.local_table.locals[insn.index]
-            end
-            next if variable.nil?
+        flow.out.each do |out_flow|
+          insn = @cfg.insns[out_flow.length]
 
-            unless @var_flows.key?(variable.name)
-              @var_flows[variable.name] = { from: [] }
-            end
-            @var_flows[variable.name][:from] = [
-              *@var_flows[variable.name][:from],
-              *trace_flows(flow)
-            ]
-          end
+          variable = nil
+          variable = @iseq.local_table.locals[insn.index] if insn.is_a?(
+            SyntaxTree::YARV::SetLocalWC0
+          )
+          next if variable.nil?
+
+          @var_flows[variable.name] = { from: [] } unless @var_flows.key?(
+            variable.name
+          )
+          @var_flows[variable.name][:from] = [
+            *@var_flows[variable.name][:from],
+            *trace_flows(flow)
+          ]
         end
       end
 
@@ -49,7 +51,7 @@ module Tainted
       return flow if flow.is_a? Symbol
 
       insn = @cfg.insns[flow.length]
-      return unless is_local?(insn)
+      return unless local?(insn)
 
       @iseq.local_table.locals[insn.index].name
     end
@@ -71,10 +73,10 @@ module Tainted
         ]
       end
 
-      return from.map { |in_flow| var_from_insn(in_flow) }.reject(&:nil?)
+      from.map { |in_flow| var_from_insn(in_flow) }.reject(&:nil?)
     end
 
-    def is_local?(insn)
+    def local?(insn)
       [
         SyntaxTree::YARV::GetLocalWC0,
         SyntaxTree::YARV::GetLocalWC1,

@@ -1,7 +1,14 @@
+# frozen_string_literal: true
+
 module Tainted
   class Static < SyntaxTree::Visitor
-    def initialize(var_dependencies, sources, sinks)
+    attr_reader :result
+
+    def initialize(sources, _sinks)
+      super()
+
       @sources = sources
+      @result = []
     end
 
     def visit(node)
@@ -22,26 +29,26 @@ module Tainted
 
     def parse_assign(node)
       variable_name = node.target.value.value
+      # pp node.value.class
       return unless node.value.is_a?(SyntaxTree::CallNode)
 
       method_name = node.value.message.value
-      if @sources.include?(method_name.to_sym)
-        State.instance.var_dependencies[variable_name.to_sym][:tainted] = true
-      end
+      return unless @sources.include?(method_name&.to_sym)
+
+      State.instance.var_dependencies[variable_name.to_sym][:tainted] = true
     end
 
     def parse_call(node)
       arguments = node.arguments.arguments.parts
 
-      taint_statuses = arguments.map do |arg| 
-        [arg, taint_status(arg.value.value.to_sym)]
-      end
+      taint_statuses =
+        arguments.map { |arg| [arg, taint_status(arg.value.value.to_sym)] }
 
       method_name = node.message.value
       taint_statuses.each do |status|
-        if status[1]
-          puts "Method `#{method_name}()` consuming tainted variable `#{status[0].value.value}`"
-        end
+        next unless status[1]
+
+        @result << "Method `#{method_name}()` consuming tainted variable `#{status[0].value.value}`"
       end
     end
 
