@@ -4,10 +4,11 @@ module Tainted
   class Static < SyntaxTree::Visitor
     attr_reader :result
 
-    def initialize(sources, _sinks)
+    def initialize(sources, sinks)
       super()
 
       @sources = sources
+      @sinks = sinks
       @result = []
     end
 
@@ -45,6 +46,8 @@ module Tainted
         arguments.map { |arg| [arg, taint_status(arg.value.value.to_sym)] }
 
       method_name = node.message.value
+      return unless @sinks.include?(method_name.to_sym)
+
       taint_statuses.each do |status|
         next unless status[1]
 
