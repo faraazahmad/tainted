@@ -5,7 +5,7 @@ module Tainted
     def initialize(filepath, sources, sinks)
       @filepath = filepath
 
-      t = Tainted::DataFlow.new(@filepath)
+      t = DataFlow.new(@filepath)
       t.generate
       var_dependencies = t.tainted
       State.instance.var_dependencies = var_dependencies
