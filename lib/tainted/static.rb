@@ -52,8 +52,6 @@ module Tainted
       taint_statuses =
         arguments.map { |arg| [arg, taint_status(arg.value.value.to_sym)] }
 
-      pp State.instance.var_dependencies
-      
       method_name = node.message.value
       return unless @sinks.include?(method_name.to_sym)
 
