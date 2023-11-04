@@ -30,10 +30,17 @@ module Tainted
 
     def parse_assign(node)
       variable_name = node.target.value.value
-      # pp node.value.class
-      return unless node.value.is_a?(SyntaxTree::CallNode)
 
-      method_name = node.value.message.value
+      method_name =
+        case node.value
+        when SyntaxTree::CallNode
+          node.value.message.value
+        when SyntaxTree::ARef
+          # (aref (vcall (ident "<method_name>")))
+          node.value.collection.value.value
+        end
+
+      return if method_name.nil?
       return unless @sources.include?(method_name&.to_sym)
 
       State.instance.var_dependencies[variable_name.to_sym][:tainted] = true
@@ -45,6 +52,8 @@ module Tainted
       taint_statuses =
         arguments.map { |arg| [arg, taint_status(arg.value.value.to_sym)] }
 
+      pp State.instance.var_dependencies
+      
       method_name = node.message.value
       return unless @sinks.include?(method_name.to_sym)
 
