@@ -29,8 +29,13 @@ require 'tainted'
 file = "#{__dir__}/../fixtures/simple.rb"
 lint = Tainted::Lint.new(file, %i[tainted], %i[unsafe])
 lint.analyze
-# Method `unsafe()` consuming tainted variable `d`
-# Method `unsafe()` consuming tainted variable `c`
+=>
+[#<Tainted::Offense:0x0000000107caf690
+  @message="Method `unsafe()` consuming tainted variable `d`",
+  @node=(call nil nil (ident "unsafe") (arg_paren (args ((var_ref (ident "d"))))))>,
+ #<Tainted::Offense:0x0000000107caf5f0
+  @message="Method `unsafe()` consuming tainted variable `c`",
+  @node=(call nil nil (ident "unsafe") (arg_paren (args ((var_ref (ident "c"))))))>]
 ```
 
 ## Development
