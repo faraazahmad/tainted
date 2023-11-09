@@ -5,7 +5,7 @@ RSpec.describe Tainted::Lint do
     it "returns a result listing the taint errors" do
       file = File.expand_path "#{__dir__}/../../fixtures/simple.rb"
       lint = Tainted::Lint.new(file, %i[tainted], %i[unsafe])
-      result = lint.analyze
+      result = lint.analyze.map { |offense| offense.message }
 
       expect(result).to eq(
         [
@@ -18,7 +18,7 @@ RSpec.describe Tainted::Lint do
     it "returns issue for sql query from unsanitized param" do
       file = File.expand_path "#{__dir__}/../../fixtures/params.rb"
       lint = Tainted::Lint.new(file, %i[params], %i[execute])
-      result = lint.analyze
+      result = lint.analyze.map { |offense| offense.message }
 
       expect(result).to eq(
         [

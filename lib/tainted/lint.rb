@@ -15,7 +15,7 @@ module Tainted
 
     def analyze
       @visitor.visit(SyntaxTree.parse_file(@filepath))
-      @visitor.result
+      @visitor.offenses
     end
   end
 end

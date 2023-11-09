@@ -2,14 +2,14 @@
 
 module Tainted
   class Static < SyntaxTree::Visitor
-    attr_reader :result
+    attr_reader :offenses
 
     def initialize(sources, sinks)
       super()
 
       @sources = sources
       @sinks = sinks
-      @result = []
+      @offenses = []
     end
 
     def visit(node)
@@ -58,7 +58,7 @@ module Tainted
       taint_statuses.each do |status|
         next unless status[1]
 
-        @result << "Method `#{method_name}()` consuming tainted variable `#{status[0].value.value}`"
+        @offenses << Offense.new(node, "Method `#{method_name}()` consuming tainted variable `#{status[0].value.value}`")
       end
     end
 
